@@ -14,6 +14,7 @@ function getObj(s)
 end
 
 function log(message)
+    local NetworkCard = computer.getPCIDevices(findClass("NetworkCard"))[1]
     print(message)
     NetworkCard:send("654D04274F62C9562665E299A8024E60", 80, message) 
 end
