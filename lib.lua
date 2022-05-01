@@ -48,9 +48,10 @@ thread = {
     current = 1
 }
    
-function thread.create(func)
+function thread.create(func, ...)
     local t = {}
     t.co = coroutine.create(func)
+    t.params = ...
     function t:stop()
         for i,th in pairs(thread.threads) do
             if th == t then
@@ -70,7 +71,7 @@ function thread:run()
         if thread.current > #thread.threads then
             thread.current = 1
         end
-        coroutine.resume(true, thread.threads[thread.current].co)
+        coroutine.resume(true, thread.threads[thread.current].co, thread.threads[thread.current].params)
         thread.current = thread.current + 1
     end
 end
