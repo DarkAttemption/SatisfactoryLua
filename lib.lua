@@ -54,20 +54,16 @@ function threadManager:add(func, ...)
 end
 
 function threadManager:run()
-    local i = 1
     while true do
-        if #self.threads < 1 then
-            return
+        for i = 1, #self.threads, 1 do
+            if coroutine.status(self.threads[i].co) == "dead" then 
+                table.remove(self.threads, i)
+                if #self.threads == 0 then return end
+                break
+            else
+                coroutine.resume(self.threads[i].co, table.unpack(self.threads[i].params))
+            end
         end
-        if i > #self.threads then
-            i = 1
-        end
-        if coroutine.status(self.threads[i].co) == "dead" then 
-            table.remove(self.threads, i)
-        else
-            coroutine.resume(self.threads[i].co, table.unpack(self.threads[i].params))
-        end
-        i = i + 1
         sleep(ThreadSleepTime)
     end
 end
