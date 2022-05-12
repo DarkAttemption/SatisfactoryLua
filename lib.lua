@@ -1,11 +1,11 @@
 -- Logging Options
-local EnableLogging = true
-local Debug = true
-local LogServerAddress = "654D04274F62C9562665E299A8024E60"
-local NetworkCard = computer.getPCIDevices(findClass("NetworkCard"))[1]
+EnableLogging = true
+Debug = true
+LogServerAddress = "654D04274F62C9562665E299A8024E60"
+NetworkCard = computer.getPCIDevices(findClass("NetworkCard"))[1]
 
 -- Threading Options
-local ThreadSleepTime = 0.0
+ThreadSleepTime = 0.0
 
 -- General Functions
 function sleep(s)
