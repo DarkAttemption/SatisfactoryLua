@@ -1,5 +1,11 @@
--- Variables
-debug = true
+-- Logging Options
+local EnableLogging = true
+local Debug = true
+local LogServerAddress = "654D04274F62C9562665E299A8024E60"
+local NetworkCard = computer.getPCIDevices(findClass("NetworkCard"))[1]
+
+-- Threading Options
+local SleepTime = 0.0
 
 -- General Functions
 function sleep(s)
@@ -17,61 +23,51 @@ function getObj(s)
     if debug then print("No object found for ", s) end
 end
 
+function getTime()
+    return computer.time()
+end
+
+function printTime(time)
+    time = math.floor(time / 12)
+    local days = math.floor(time/86400)
+    local hours = math.floor(math.fmod(time, 86400)/3600)
+    local minutes = math.floor(math.fmod(time,3600)/60)
+    local seconds = math.floor(math.fmod(time,60))
+    print(string.format("%d:%02d:%02d:%02d",days,hours,minutes,seconds))
+end
+
 function log(message)
-    local NetworkCard = computer.getPCIDevices(findClass("NetworkCard"))[1]
-    if debug then print(message) end
-    NetworkCard:send("654D04274F62C9562665E299A8024E60", 80, message) 
-end
-
--- Central Storage
-ItemConnector = {splitter = {}, amount = 0}
-function ItemConnector:new(o, splitter, amount)
-    o = o or {}
-    setmetatable(o, self)
-    self.__index = self
-    self.splitter = splitter
-    self.amount = amount
-    return o
-end
-
-Factory = {name = "", itemConnectors = {}}
-function Factory:new (o)
-    o = o or {}
-    setmetatable(o, self)
-    self.__index = self
-    return o
+    if EnableLogging then 
+        if Debug then print(message) end
+        NetworkCard:send(LogServerAddress, 80, message) 
+    end
 end
 
 -- Threading
-thread = {
-    threads = {},
-    current = 1
-}
+threadManager = {threads = {}}
    
-function thread.create(func, ...)
+function threadManager:add(func, ...)
     local t = {}
     t.co = coroutine.create(func)
-    t.params = ...
-    function t:stop()
-        for i,th in pairs(thread.threads) do
-            if th == t then
-                table.remove(thread.threads, i)
-            end
-        end
-    end
-    table.insert(thread.threads, t)
-    return t
+    t.params = {...}
+    table.insert(self.threads, t)
 end
 
-function thread:run()
+function threadManager:run()
+    local i = 1
     while true do
-        if #thread.threads < 1 then
+        if #self.threads < 1 then
             return
         end
-        if thread.current > #thread.threads then
-            thread.current = 1
+        if i > #self.threads then
+            i = 1
         end
-        coroutine.resume(true, thread.threads[thread.current].co, thread.threads[thread.current].params)
-        thread.current = thread.current + 1
+        if coroutine.status(self.threads[i].co) == "dead" then 
+            table.remove(self.threads, i)
+        else
+            coroutine.resume(self.threads[i].co, table.unpack(self.threads[i].params))
+        end
+        i = i + 1
+        sleep(SleepTime)
     end
 end
