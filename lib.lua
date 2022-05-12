@@ -5,7 +5,7 @@ local LogServerAddress = "654D04274F62C9562665E299A8024E60"
 local NetworkCard = computer.getPCIDevices(findClass("NetworkCard"))[1]
 
 -- Threading Options
-local SleepTime = 0.0
+local ThreadSleepTime = 0.0
 
 -- General Functions
 function sleep(s)
@@ -16,11 +16,11 @@ function getObj(s)
     local res = component.proxy(component.findComponent(s))
 
     for i,k in pairs(res) do
-        if k ~= nil then if debug then print("Object " .. s .. " found: ", k) end end
+        if k ~= nil then if Debug then print("Object " .. s .. " found: ", k) end end
         return k
     end
 
-    if debug then print("No object found for ", s) end
+    if Debug then print("No object found for ", s) end
 end
 
 function getTime()
@@ -68,6 +68,6 @@ function threadManager:run()
             coroutine.resume(self.threads[i].co, table.unpack(self.threads[i].params))
         end
         i = i + 1
-        sleep(SleepTime)
+        sleep(ThreadSleepTime)
     end
 end
